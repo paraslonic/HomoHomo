@@ -59,7 +59,7 @@ while(my $result = $report->next_result){
 	my $qend = $hsp->end('query');
 
 	# skip if alignment is too short
-	if(abs($qend - $qstart) < 2*$indent -1) { print "qend-qstart:".($qend - $astart) . "\n"; next; }; # CHECK!!!! 
+	if(abs($qend - $qstart) < 2*$indent -1) { print "qend-qstart:".($qend - $astart)."(int: $intend)" . "\n"; next; }; # CHECK!!!! 
 	# info
 	$gaps = $hsp->gaps;
 	$evalue = $hsp->evalue;	
@@ -68,17 +68,17 @@ while(my $result = $report->next_result){
 	# c o m p a r e    w i t h    v c f
 	my $start = $indent-$qstart; 
 	my $toend = $hit->length('total') - $start;
-	my $seq = $VCF{$qname[0]}{$qname[1]}{"seq"};  
-	my $alt =  $VCF{$qname[0]}{$qname[1]}{"alt"}; 
+	my $seq = uc $VCF{$qname[0]}{$qname[1]}{"seq"};  
+	my $alt =  uc $VCF{$qname[0]}{$qname[1]}{"alt"}; 
 	$alt =~ s/,.*//; 	# select only first alt variant
-	my $ref = substr($hsp->hit_string, $start, $toend);
+	my $ref = uc substr($hsp->hit_string, $start, $toend);
 	# print
 	say L "- - -\n$qname"; 
  	say L "assembly:  " . substr ($hsp->query_string, $start, $toend);
 	say L "blast hit: " . $ref;
 	say L "seq_var:   " . $seq;
 	say L "alt_var:   " . $alt;
-	say L "fasta_seq: " . substr($assembly{$contig}, $pos - 1, length($seq));
+	#say L "fasta_seq: " . substr($assembly{$contig}, $pos - 1, length($seq));
 	# compare and remember
 	$ref =~ s/-//g;
 	$alt = uc $alt;
