@@ -85,7 +85,8 @@ if [ "$vcfFile" == "" ]
 then
 	echo "no VCF file. Calculating..."
 	vcfFile="tmp/vcf/$projName.vcf"
-	samtools mpileup -uf $fastaFile $bamFile | bcftools view -gvc - > $vcfFile
+	samtools mpileup -f $fastaFile $bamFile > "tmp/vcf/$projName.mpileup"
+	varscan mpileup2indel "tmp/vcf/$projName.mpileup" --output-vcf 1 > $vcfFile
 	[ ! -f $vcfFile ] && { echo "vcf calculation failed..."; exit 2; }
 fi
 echo "VCF file: $vcfFile"
