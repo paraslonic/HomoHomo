@@ -14,14 +14,11 @@ open V, ">", "tmp/pieces/indel_pieces_$name.vcf"; # only selected places
 print O "contig\tpos\taltFreq\tDP\tDP4\tseq\talt\n";
 
 while(<F>){
-	next if (!/INDEL/);
-	/IS=(\d+),(.+?);/; # IS field in INDELs only 
-	$altFreq = $2;
-	next if($altFreq < $lowFreq);
+	next if (/#/);
 	@P = split(/\t/);
         
-	# skip positions with more then 2 gaps
-        next if(abs (length($P[4]) - length($P[3])) > 2);
+	# skip positions with more then 1 gaps
+        next if(abs (length($P[4]) - length($P[3])) > 1);
 
 	$start = $P[1] - $indent; # conserved letter
 	next if($start < 0); 
@@ -30,11 +27,11 @@ while(<F>){
 	print B "$P[0]\t$start\t$end\t$P[0]____$P[1]\n";
 	
 	# info 
-	/DP=(\d+)/;
-	my $DP = $1;
-	/DP4=(.+?);/; 
-	my $DP4 = $1;
-	print O "$P[0]\t$P[1]\t$altFreq\t$DP\t$DP4\t$P[3]\t$P[4]\n"; 
+	my @inf = split(/:/,$P[9]);
+	my $ref_dep = $inf[4];
+	my $alt_dep = $inf[5];
+	my $alt_freq = ($alt_dep+1)/($ref_dep+1);
+	print O "$P[0]\t$P[1]\t$alt_freq\t$ref_dep\t$alt_dep\t$P[3]\t$P[4]\n"; 
 	print V $_;
 }
 

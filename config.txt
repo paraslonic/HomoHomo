@@ -1,5 +1,5 @@
 threads=10
-indent=50
+indent=150
 lowFreq=0.25
 evalue=0.0000000001
 reuse=1

@@ -2,6 +2,10 @@ library(vioplot)
 #setwd("/data4/bio/runs-manolov/ecoli_crohn/MiraAssemblies//HomoHomo/")
 
 args = commandArgs(trailingOnly=T)
+
+args = c("log/RCE11_Mira_RCE11_corrected.txt", "tmp/pieces/indel_pieces_RCE11_Mira_RCE11.inf")
+
+
 correctedFile = args[1]
 infoFile = args[2]
 outFile = args[3]
@@ -14,7 +18,7 @@ corrected_contig_pos = paste0(corrected$contig, "_", corrected$pos)
 boxplot(corrected$evalue, breaks = 100, main = "blast e-value of corrected")
 
 # I N D E L   I N F O
-info = read.delim(infoFile, as.is = T)
+info = read.delim(infoFile, as.is = TRUE)
 info_contig_pos = paste0(info$contig,"_", info$pos)
 
 nrow (info)
@@ -28,9 +32,9 @@ info.crd = subset(info,  info_contig_pos %in% corrected_contig_pos)
 nrow (info.crd)
 
 # freq 
-vioplot(info$altFreq, info.crd$altFreq, col = "darkolivegreen4",
-        names= c("ALL INDEL","CORRECTED"))
-title("ALT Variant Frequency")
+vioplot(info$altFreq*100, info.crd$altFreq*100, col = "dodgerblue3", 
+        names= c("все позиции","исправленные позиции"))
+title("Частота альтернативных аллелей")
 
 # freq 
 vioplot(info$DP, info.crd$DP, col = "darkolivegreen4", 
@@ -55,9 +59,13 @@ par(mfrow = c(1,1))
 
 # SEQence Frequencys
 seq.freq = summary(as.factor(paste0(info.crd$seq, " --> ", info.crd$alt)))
-seq.freq = seq.freq[order(seq.freq, decreasing=T)]
-old.par = par(mar = c(8,4,8,4))
-barplot(seq.freq, las = 2, cex.names= 0.5, main = "CORRECTED", col= "black")
+seq.freq = seq.freq[order(seq.freq, decreasing=TRUE)]
+
+png("seq_freq.png")
+old.par = par(mar = c(4,10,2,2))
+barplot(seq.freq[20:1], las = 2, cex.names= 0.8,, col= "gray20", xlab = "число исправлений",
+        hor = TRUE, cex.lab = 1.5)
+dev.off()
 
 all.freq = summary(as.factor(paste0(info$seq, " --> ", info$alt)))
 all.freq = all.freq[order(all.freq, decreasing=T)]
