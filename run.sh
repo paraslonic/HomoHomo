@@ -67,9 +67,9 @@ then
 	bamFile="tmp/bam/$projName.bam"
 	bowtie2-build $fastaFile tmp/bam/bwt/$fastaName
         bowtie2 -x tmp/bam/bwt/$fastaName -U $fastqFile -p $threads --no-unal -S tmp/bam/$projName.sam
-	samtools view -Sb tmp/bam/$projName.sam  > tmp/bam/${projName}_.bam 
-        samtools sort tmp/bam/${projName}_.bam tmp/bam/$projName
-	rm tmp/bam/${projName}_.bam
+	samtools view -S -b tmp/bam/$projName.sam  > tmp/bam/${projName}_.bam 
+        samtools sort tmp/bam/${projName}_.bam -o "$bamFile"
+	#rm tmp/bam/${projName}_.bam
         samtools index $bamFile 
 	[ ! -f $bamFile ] && { echo "mapping failed..."; exit 1; }
 fi
@@ -85,14 +85,13 @@ if [ "$vcfFile" == "" ]
 then
 	echo "no VCF file. Calculating..."
 	vcfFile="tmp/vcf/$projName.vcf"
-	samtools mpileup -f $fastaFile $bamFile > "tmp/vcf/$projName.mpileup"
-	varscan mpileup2indel "tmp/vcf/$projName.mpileup" --output-vcf 1 -min-var-freq $lowFreq > $vcfFile
+	samtools mpileup -uf $fastaFile $bamFile | bcftools view -gvc - > $vcfFile
 	[ ! -f $vcfFile ] && { echo "vcf calculation failed..."; exit 2; }
 fi
 echo "VCF file: $vcfFile"
 
 # pieces
-perl makeIndelFasta.pl $vcfFile $fastaFile $projName $indent
+perl makeIndelFasta.pl $vcfFile $fastaFile $projName $indent $lowFreq 
 
 fasta2blast="tmp/pieces/indel_pieces_$projName.fasta"
 fastaFromBed -name -bed "tmp/pieces/indel_pieces_$projName.bed" \
